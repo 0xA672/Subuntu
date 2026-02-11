@@ -10,7 +10,7 @@ Switch to the Subuntu directory you just (maybe?) pulled down locally!!
 Give the script a little ~permission~ (so it can help you download stuff)  
 `chmod +x ss.sh ` 
 
-Alright, now run!!!  （it's might you should enter password)
+Alright, now run!!!(it's might you should enter password)                                                                                                             
 `./ss.sh`
 
 If you find our tool useful, could you give us a star? Kiss you!!
