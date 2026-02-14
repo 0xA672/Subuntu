@@ -224,6 +224,18 @@ void print_usage(const char* progname) {
               << "Supported languages: C++, Rust, Go, Java, C#, Python, Node.js, Ruby, PHP, Perl, Swift, Kotlin, Dart\n";
 }
 
+void help(const char* progname) {
+    std::cout << "Usage:\n"
+              << "  " << progname << " install <language>   Install development packages for a programming language\n"
+              << "  " << progname << " list                 List all supported languages and their installation status\n"
+              << "\nSupported languages:\n"
+              << "  C++, Rust, Go, Java, C#, Python, Node.js, Ruby, PHP, Perl, Swift, Kotlin, Dart\n"
+              << "\nPackage managers automatically detected based on your system:\n"
+              << "  Linux: apt, dnf, yum, pacman\n"
+              << "  macOS: brew\n"
+              << "  Windows: choco, winget, scoop\n";
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         print_usage(argv[0]);
@@ -231,6 +243,11 @@ int main(int argc, char* argv[]) {
     }
 
     std::string cmd = argv[1];
+
+    if (cmd == "help" || cmd == "--help" || cmd == "-h") {
+        help(argv[0]);
+        return 0;
+    }
 
     if (cmd == "list") {
         std::string pm = package();
