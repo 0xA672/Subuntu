@@ -236,7 +236,7 @@ void help(const char* progname) {
               << "  Windows: choco, winget, scoop\n";
 }
 
-int main(int argc, char* argv[]) {
+auto main(int argc, char* argv[]) -> int {
     if (argc < 2) {
         print_usage(argv[0]);
         return 1;
