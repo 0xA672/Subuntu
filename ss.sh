@@ -53,6 +53,12 @@ while IFS= read -r line; do
     fi
 done < "./dep.txt"
 
+if ! command -v rustc &> /dev/null; then
+    log "Installing Rust via rustup..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source "$HOME/.cargo/env"
+fi
+
 if [ ${#failed_packages[@]} -gt 0 ]; then
     log "WARNING: The following packages failed to install:"
     printf '%s\n' "${failed_packages[@]}" | tee >(cat >&2)
