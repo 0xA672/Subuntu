@@ -32,7 +32,7 @@ if [ ! -f "./dep.txt" ]; then
 fi
 
 failed_packages=()
-# Clean input: remove CR, strip inline comments, trim whitespace
+
 clean_pkg_line() {
     tr -d '\r' | sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
 }
@@ -45,7 +45,7 @@ while IFS= read -r line; do
     if ! sudo apt install -y "$pkg"; then
         log "Attempting to fix broken packages..."
         sudo dpkg --configure -a || true
-        sudo apt --fix-broken install -y || true
+        sudo apt-get --fix-broken install -y || true
         if ! sudo apt install -y "$pkg"; then
             error "Failed to install $pkg after recovery"
             failed_packages+=("$pkg")
@@ -56,12 +56,14 @@ done < "./dep.txt"
 if ! command -v rustc &> /dev/null; then
     log "Installing Rust via rustup..."
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source "$HOME/.cargo/env"
+    log "Rust installed. To activate in current shell, run: source \$HOME/.cargo/env"
 fi
 
 if [ ${#failed_packages[@]} -gt 0 ]; then
     log "WARNING: The following packages failed to install:"
-    printf '%s\n' "${failed_packages[@]}" | tee >(cat >&2)
+    for p in "${failed_packages[@]}"; do
+        echo "  - $p" | tee >(cat >&2)
+    done
 fi
 
 log "Finalizing package configuration..."
@@ -71,9 +73,8 @@ sudo apt clean
 
 log "System provisioning completed."
 log "Log file: $LOG_FILE"
-log "Please reload your shell: source ~/.bashrc"
+log "Please reload your shell with 'source ~/.bashrc' or restart your terminal."
 
-# Accurate status reporting
 upgradable=$(apt-get -s upgrade 2>/dev/null | grep -c '^Inst' || echo 0)
 broken=$(dpkg-query -W -f='${Status}\n' 2>/dev/null | grep -cE 'not-installed|config-files|half-installed' || echo 0)
 disk_usage=$(df -h / | awk 'NR==2 {print $5}')
