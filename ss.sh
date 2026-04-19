@@ -1,68 +1,78 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e
-set -o pipefail
+set -euo pipefail
 
-script_dir="$(dirname "$(readlink -f "$0")")"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_dir"
 
 LOG_FILE="/tmp/subuntu_install_$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
-echo "Updating package index..."
+log()   { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
+error() { log "ERROR: $*" >&2; }
+
+log "Starting system provisioning..."
+
+log "Updating package index..."
 if ! sudo apt update; then
-    echo "ERROR: Failed to update package index" >&2
+    error "Failed to update package index"
     exit 1
 fi
 
-echo "Installing software-properties-common and transport utilities..."
+log "Installing base utilities..."
 if ! sudo apt install -y software-properties-common apt-transport-https curl wget; then
-    echo "ERROR: Failed to install base utilities" >&2
+    error "Failed to install base utilities"
     exit 1
 fi
 
-echo "Executing custom package deployment..."
-if [ -f "./dep.txt" ]; then
-    failed_packages=()
-    while IFS= read -r package; do
-        if [ -n "$package" ] && [[ ! "$package" =~ ^# ]]; then
-            echo "Deploying package: $package"
-            if ! sudo apt install -y "$package"; then
-                echo "Warning: Initial installation failed for $package, attempting recovery..."
-                sudo dpkg --configure -a || echo "Warning: dpkg configure had issues"
-                sudo apt --fix-broken install -y || echo "Warning: fix-broken had issues"
-                if ! sudo apt install -y "$package"; then
-                    echo "Critical: Failed to install $package after recovery attempts" >&2
-                    failed_packages+=("$package")
-                    continue
-                fi
-            fi
+log "Processing dependency manifest..."
+if [ ! -f "./dep.txt" ]; then
+    error "Dependency manifest 'dep.txt' not found in $script_dir"
+    exit 1
+fi
+
+failed_packages=()
+# Clean input: remove CR, strip inline comments, trim whitespace
+clean_pkg_line() {
+    tr -d '\r' | sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+}
+
+while IFS= read -r line; do
+    pkg=$(echo "$line" | clean_pkg_line)
+    [ -z "$pkg" ] && continue
+
+    log "Installing: $pkg"
+    if ! sudo apt install -y "$pkg"; then
+        log "Attempting to fix broken packages..."
+        sudo dpkg --configure -a || true
+        sudo apt --fix-broken install -y || true
+        if ! sudo apt install -y "$pkg"; then
+            error "Failed to install $pkg after recovery"
+            failed_packages+=("$pkg")
         fi
-    done < "./dep.txt"
-    
-    if [ ${#failed_packages[@]} -gt 0 ]; then
-        echo "WARNING: The following packages failed to install:" >&2
-        printf '%s\n' "${failed_packages[@]}" >&2
     fi
-else
-    echo "Error: Dependency manifest 'dep.txt' not found in script directory."
-    echo "Expected location: $script_dir/dep.txt"
-    echo "Please ensure the dependency file exists in the same directory as this script."
-    exit 1
+done < "./dep.txt"
+
+if [ ${#failed_packages[@]} -gt 0 ]; then
+    log "WARNING: The following packages failed to install:"
+    printf '%s\n' "${failed_packages[@]}" | tee >(cat >&2)
 fi
 
-echo "Addressing WSL-specific package configuration issues..."
-sudo dpkg --configure -a || echo "Note: Some dpkg configuration issues encountered"
-
-echo "Performing system maintenance tasks..."
+log "Finalizing package configuration..."
+sudo dpkg --configure -a || log "Note: dpkg configuration check completed with warnings"
 sudo apt autoremove -y
 sudo apt clean
 
-echo "System provisioning completed successfully."
-echo "Log file saved to: $LOG_FILE"
-echo "Reload your shell configuration with 'source ~/.bashrc' or restart your terminal session to apply all changes."
+log "System provisioning completed."
+log "Log file: $LOG_FILE"
+log "Please reload your shell: source ~/.bashrc"
 
-echo "Current system status:"
-echo "- Package upgrades available: $(apt list --upgradable 2>&1 | wc -l) packages"
-echo "- Broken packages: $(dpkg -l 2>/dev/null | grep ^.[RHUFW] | wc -l)"
-echo "- Disk space usage: $(df -h / | tail -1 | awk '{print $5}')"
+# Accurate status reporting
+upgradable=$(apt-get -s upgrade 2>/dev/null | grep -c '^Inst' || echo 0)
+broken=$(dpkg-query -W -f='${Status}\n' 2>/dev/null | grep -cE 'not-installed|config-files|half-installed' || echo 0)
+disk_usage=$(df -h / | awk 'NR==2 {print $5}')
+
+log "Current system status:"
+log "  - Packages with available upgrades: $upgradable"
+log "  - Packages in broken/incomplete state: $broken"
+log "  - Root filesystem usage: $disk_usage"
