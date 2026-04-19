@@ -1,79 +1,135 @@
+# ------------------------------------------------------------
+# Development Tools (C/C++/Build)
+# ------------------------------------------------------------
 autoconf
 automake
-base-files
-bash
-bsdutils
 build-essential
+cmake
+g++
+gdb
+libtool
+make
+pkg-config
+
+# ------------------------------------------------------------
+# Compilers & Toolchains
+# ------------------------------------------------------------
 clang
 clang-format
 clang-tidy
-cmake
-coreutils
-curl
-dash
-debianutils
-diffutils
-dnsutils
-docker.io
-dotnet-sdk-8.0
-doxygen
-findutils
-g++
-gdb
-git
-git-lfs
-golang-go
-graphviz
-grep
-gzip
-hostname
-htop
-iftop
-init
-intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
-iotop
-jq
-just
-libcurl4-openssl-dev
-libjsoncpp-dev
-libsqlite3-dev
-libssl-dev
-libtool
-linux-tools-common
-linux-tools-generic
 lld
 lldb
-login
+gcc-mingw-w64-x86-64      # Windows cross-compile (replaces mingw-w64)
+
+# ------------------------------------------------------------
+# Debugging & Profiling
+# ------------------------------------------------------------
 ltrace
-make
-mingw-w64
-ncdu
-ncurses-base
-ncurses-bin
-neofetch
-nlohmann-json3-dev
-nmap
-nodejs
-npm
-pcp
-pkg-config
-postgresql
-postgresql-contrib
+strace
+valgrind
+
+# ------------------------------------------------------------
+# Version Control & Utilities
+# ------------------------------------------------------------
+git
+git-lfs
+curl
+wget
+jq
+tree
+
+# ------------------------------------------------------------
+# Editors / Shells
+# ------------------------------------------------------------
+zsh
+shellcheck
+# vim / nano (usually preinstalled)
+
+# ------------------------------------------------------------
+# Python Ecosystem
+# ------------------------------------------------------------
 python3
 python3-dev
 python3-pip
 python3-venv
-rustup
-shellcheck
-strace
-tcpdump
-tree
-ubuntu-minimal
-ubuntu-wsl
-util-linux
+
+# ------------------------------------------------------------
+# Node.js / JavaScript
+# ------------------------------------------------------------
+nodejs
+npm
+
+# ------------------------------------------------------------
+# Go Language
+# ------------------------------------------------------------
+golang                     # instead of golang-go
+
+# ------------------------------------------------------------
+# Rust (Note: must be installed via rustup script, not apt)
+# ------------------------------------------------------------
+# rustup (handled separately)
+
+# ------------------------------------------------------------
+# .NET (Requires Microsoft APT repository)
+# ------------------------------------------------------------
+# dotnet-sdk-8.0
+
+# ------------------------------------------------------------
+# Databases & Clients
+# ------------------------------------------------------------
+libsqlite3-dev
+# postgresql postgresql-contrib   # Uncomment if full server needed
+# libpq-dev                       # Client only
+
+# ------------------------------------------------------------
+# Container & Virtualization
+# ------------------------------------------------------------
+docker.io
+
+# ------------------------------------------------------------
+# Documentation & Diagrams
+# ------------------------------------------------------------
+doxygen
+graphviz
+
+# ------------------------------------------------------------
+# Libraries (Development Headers)
+# ------------------------------------------------------------
+libcurl4-openssl-dev
+libssl-dev
 uuid-dev
-valgrind
-whois
 zlib1g-dev
-zsh
-zstd
+nlohmann-json3-dev
+libjsoncpp-dev
+
+# ------------------------------------------------------------
+# System Monitoring & Network
+# ------------------------------------------------------------
+htop
+btop                      # modern alternative to htop/iotop
+ncdu
+nmap
+tcpdump
+iftop
+dnsutils
+whois
+
+# ------------------------------------------------------------
+# Performance Co-Pilot (optional, requires service)
+# ------------------------------------------------------------
+# pcp
+
+# ------------------------------------------------------------
+# WSL Integration (essential for WSL environment)
+# ------------------------------------------------------------
+ubuntu-wsl
+
+# ------------------------------------------------------------
+# Fastfetch (modern neofetch replacement)
+# ------------------------------------------------------------
+fastfetch                  # instead of neofetch
+
+# ------------------------------------------------------------
+# Misc CLI Utilities
+# ------------------------------------------------------------
+just
